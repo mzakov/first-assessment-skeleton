@@ -43,14 +43,27 @@ public class ClientHandler implements Runnable {
 						log.info("user <{}> connected", message.getUsername());
 						clientMap.put(message.getUsername(), socket);				//adds the client to the map
 						log.info("Users online <{}>", clientMap.entrySet());		//prints out the map in console
-						message.setContents(clientMap.keySet().toString());			//returns list of connected clients
-						String list = mapper.writeValueAsString(message);
-						writer.write(list);
-						writer.flush();
+						message.setContents("I'm online!");
+						String conn = mapper.writeValueAsString(message);
+						for (Socket socket : clientMap.values()) {
+							log.info("broadcast sent to socket <{}>", socket);
+							PrintWriter broadWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+							broadWriter.write(conn);
+							broadWriter.flush();
+						}
+						
 						break;
 					case "disconnect":
 						log.info("user <{}> disconnected", message.getUsername());
 						clientMap.remove(message.getUsername());					//removes the client from the list
+						message.setContents("I'm Gone!");
+						String dis = mapper.writeValueAsString(message);
+						for (Socket socket : clientMap.values()) {
+							log.info("broadcast sent to socket <{}>", socket);
+							PrintWriter broadWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+							broadWriter.write(dis);
+							broadWriter.flush();
+						}
 						this.socket.close();
 						break;
 					case "echo":
@@ -68,6 +81,13 @@ public class ClientHandler implements Runnable {
 							broadWriter.write(broadcast);
 							broadWriter.flush();
 						}
+						break;
+					case "users":
+						log.info("user ,<{}> asked for users list", message.getUsername());
+						message.setContents("Active users => " + clientMap.keySet().toString());
+						String users = mapper.writeValueAsString(message);
+						writer.write(users);
+						writer.flush();
 						break;
 				}
 			}
