@@ -59,6 +59,16 @@ public class ClientHandler implements Runnable {
 						writer.write(response);
 						writer.flush();
 						break;
+					case "broadcast":
+						log.info("user <{}> broadcasted message <{}>", message.getUsername(), message.getContents());
+						String broadcast = mapper.writeValueAsString(message);
+						for (Socket socket : clientMap.values()) {
+							log.info("broadcast sent to socket <{}>", socket);
+							PrintWriter broadWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+							broadWriter.write(broadcast);
+							broadWriter.flush();
+						}
+						break;
 				}
 			}
 
