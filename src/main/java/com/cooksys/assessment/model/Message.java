@@ -1,5 +1,8 @@
 package com.cooksys.assessment.model;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Message {
 
 	private String username;
@@ -27,7 +30,7 @@ public class Message {
 	}
 
 	public void setContents(String contents) {
-		this.contents = contents;
+		this.contents = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date()) + " " + contents;
 	}
 
 }

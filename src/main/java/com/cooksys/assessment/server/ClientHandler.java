@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,10 @@ public class ClientHandler implements Runnable {
 		super();
 		this.socket = socket;
 	}
-
+	
+	//makes a concurrent map for all the clients
+	public static ConcurrentHashMap<String, Socket> clientMap = new ConcurrentHashMap<String, Socket>();
+	
 	public void run() {
 		try {
 
@@ -37,9 +41,16 @@ public class ClientHandler implements Runnable {
 				switch (message.getCommand()) {
 					case "connect":
 						log.info("user <{}> connected", message.getUsername());
+						clientMap.put(message.getUsername(), socket);				//adds the client to the map
+						log.info("Users online <{}>", clientMap.entrySet());		//prints out the map in console
+						message.setContents(clientMap.keySet().toString());			//returns list of connected clients
+						String list = mapper.writeValueAsString(message);
+						writer.write(list);
+						writer.flush();
 						break;
 					case "disconnect":
 						log.info("user <{}> disconnected", message.getUsername());
+						clientMap.remove(message.getUsername());					//removes the client from the list
 						this.socket.close();
 						break;
 					case "echo":
