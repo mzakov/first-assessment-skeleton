@@ -27,6 +27,8 @@ public class ClientHandler implements Runnable {
 	//makes a concurrent map for all the clients
 	public static ConcurrentHashMap<String, Socket> clientMap = new ConcurrentHashMap<String, Socket>();
 	
+	public String reciever = "";
+	
 	public void run() {
 		try {
 
@@ -38,6 +40,12 @@ public class ClientHandler implements Runnable {
 				String raw = reader.readLine();
 				Message message = mapper.readValue(raw, Message.class);
 
+				if (message.getCommand().charAt(0) == '@' && clientMap.containsKey(message.getCommand().substring(1))){
+					reciever = message.getCommand().substring(1);
+					message.setCommand("@");
+					log.info("Command: <{}>; Reciever: <{}>", message.getCommand(), reciever);
+				}
+				
 				switch (message.getCommand()) {
 					case "connect":
 						log.info("user <{}> connected", message.getUsername());
@@ -51,7 +59,6 @@ public class ClientHandler implements Runnable {
 							broadWriter.write(conn);
 							broadWriter.flush();
 						}
-						
 						break;
 					case "disconnect":
 						log.info("user <{}> disconnected", message.getUsername());
@@ -88,6 +95,13 @@ public class ClientHandler implements Runnable {
 						String users = mapper.writeValueAsString(message);
 						writer.write(users);
 						writer.flush();
+						break;
+					case "@":
+						log.info("From <{}> to <{}>: <{}>", message.getUsername(), reciever, message.getContents());
+						String msg = mapper.writeValueAsString(message);
+						PrintWriter broadWriter = new PrintWriter(new OutputStreamWriter(clientMap.get(reciever).getOutputStream()));
+						broadWriter.write(msg);
+						broadWriter.flush();
 						break;
 				}
 			}

@@ -30,7 +30,7 @@ cli
     })
   })
   .action(function (input, callback) {
-    const [ command, ...rest ] = words(input)
+    const [ command, ...rest ] = words(input, /[^, ]+/g)
     const contents = rest.join(' ')
 
     if (command === 'disconnect') {
@@ -41,6 +41,9 @@ cli
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
     } else if (command === 'users') {
       server.write(new Message({ username, command }).toJSON() + '\n')
+    } else if (command.substring(0, 1) === '@') {
+      this.log(`Sending to server <${username}> <${command}> <${contents}>`)
+      server.write(new Message({ username, command, contents }).toJSON() + '\n')
     } else {
       this.log(`Command <${command}> was not recognized`)
     }
