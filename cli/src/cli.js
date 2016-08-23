@@ -9,7 +9,7 @@ export const cli = vorpal()
 
 let username
 let server
-let defCommand
+let defCommand = ''
 
 cli
   .delimiter(cli.chalk['yellow']('ftd~$'))
@@ -46,7 +46,6 @@ cli
     const contents = rest.join(' ')
     if (command === 'disconnect') {
       server.end(new Message({ username, command }).toJSON() + '\n')
-      defCommand = command
     } else if (command === 'echo') {
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
       defCommand = command

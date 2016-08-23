@@ -27,6 +27,7 @@ public class ClientHandler implements Runnable {
 	//makes a concurrent map for all the clients
 	public static ConcurrentHashMap<String, Socket> clientMap = new ConcurrentHashMap<String, Socket>();
 	
+	private String client;
 	public String reciever = "";
 	
 	public void run() {
@@ -48,8 +49,17 @@ public class ClientHandler implements Runnable {
 				
 				switch (message.getCommand()) {
 					case "connect":
+						if (clientMap.containsKey(message.getUsername())){
+							message.setCommand("disconnect");
+							message.setContents("The username '" + message.getUsername() + "' is not available, please try another one!");
+							String response = mapper.writeValueAsString(message);
+							writer.write(response);
+							writer.flush();
+							this.socket.close();
+						} else {
 						log.info("user <{}> connected", message.getUsername());
-						clientMap.put(message.getUsername(), socket);				//adds the client to the map
+						client = message.getUsername();
+						clientMap.put(client, socket);								//adds the client to the map
 						log.info("Users online <{}>", clientMap.entrySet());		//prints out the map in console
 						message.setContents("I'm online!");
 						String conn = mapper.writeValueAsString(message);
@@ -58,6 +68,7 @@ public class ClientHandler implements Runnable {
 							PrintWriter broadWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
 							broadWriter.write(conn);
 							broadWriter.flush();
+						}
 						}
 						break;
 					case "disconnect":
@@ -105,8 +116,8 @@ public class ClientHandler implements Runnable {
 						break;
 				}
 			}
-
 		} catch (IOException e) {
+			clientMap.remove(client);
 			log.error("Something went wrong :/", e);
 		}
 	}

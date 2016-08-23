@@ -30,7 +30,7 @@ public class Message {
 	}
 
 	public void setContents(String contents) {
-		this.contents = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date()) + " " + username + ": " + contents;
+		this.contents = new SimpleDateFormat("MM/dd/yy HH:mm:ss").format(new Date()) + " " + username + " (" + command + "): " + contents;
 	}
 
 }
