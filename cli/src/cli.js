@@ -28,22 +28,22 @@ cli
       let message = Message.fromJSON(buffer)
       switch (message.command) {
         case 'echo':
-          this.log(cli.chalk['gray'](message.toString()))
+          this.log(cli.chalk['green'](message.toString()))
           break
         case 'broadcast':
           this.log(cli.chalk['cyan'](message.toString()))
           break
         case 'connect':
-          this.log(message.toString())
+          this.log(cli.chalk['gray'](message.toString()))
           break
         case 'disconnect':
-          this.log(message.toString())
+          this.log(cli.chalk['gray'](message.toString()))
           break
         case 'users':
-          this.log(message.toString())
+          this.log(cli.chalk['gray'](message.toString()))
           break
         default:
-          this.log(cli.chalk['gray'](message.toString()))
+          this.log(message.toString())
       }
     })
 
@@ -74,7 +74,7 @@ cli
     } else if (command === 'users') {
       server.write(new Message({ username, command }).toJSON() + '\n')
       defCommand = command
-    } else if (command.substring(0, 1) === '@') {
+    } else if (command.substring(0, 1) === '@' && command.length > 1) {
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
       defCommand = command
     } else {

@@ -10,10 +10,10 @@ import org.slf4j.LoggerFactory;
 
 public class Server implements Runnable {
 	private Logger log = LoggerFactory.getLogger(Server.class);
-	
+
 	private int port;
 	private ExecutorService executor;
-	
+
 	public Server(int port, ExecutorService executor) {
 		super();
 		this.port = port;
