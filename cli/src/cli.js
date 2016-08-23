@@ -1,6 +1,7 @@
 import vorpal from 'vorpal'
 import { words } from 'lodash'
 import { indexOf } from 'lodash'
+import { split } from 'lodash'
 import { connect } from 'net'
 import { Message } from './Message'
 
@@ -8,8 +9,7 @@ export const cli = vorpal()
 
 let username
 let server
-let commands = ['disconnect', 'echo', 'broadcast', 'users']
-let defCommand = undefined
+let defCommand
 
 cli
   .delimiter(cli.chalk['yellow']('ftd~$'))
@@ -33,13 +33,17 @@ cli
     })
   })
   .action(function (input, callback) {
-    const [ command, ...rest ] = words(input, /[^, ]+/g)
-    const contents = rest.join(' ')
+    const commands = ['disconnect', 'echo', 'broadcast', 'users']
+    let cont
+    let comm = split(input, ' ', 1)[0]
 
-    if ((commands.indexOf(command) === -1 || command.substring(0, 1) !== '@') && defCommand !== undefined) {
-      command = defCommand
+    if (indexOf(commands, comm, [0]) < 0 && comm.substring(0, 1) !== '@') {
+      cont = defCommand + ' ' + input
+    } else {
+      cont = input
     }
-
+    const [ command, ...rest ] = words(cont, /[^, ]+/g)
+    const contents = rest.join(' ')
     if (command === 'disconnect') {
       server.end(new Message({ username, command }).toJSON() + '\n')
       defCommand = command
