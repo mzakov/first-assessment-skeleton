@@ -25,7 +25,26 @@ cli
     })
 
     server.on('data', (buffer) => {
-      this.log(Message.fromJSON(buffer).toString())
+      let message = Message.fromJSON(buffer)
+      switch (message.command) {
+        case 'echo':
+          this.log(cli.chalk['gray'](message.toString()))
+          break
+        case 'broadcast':
+          this.log(cli.chalk['cyan'](message.toString()))
+          break
+        case 'connect':
+          this.log(message.toString())
+          break
+        case 'disconnect':
+          this.log(message.toString())
+          break
+        case 'users':
+          this.log(message.toString())
+          break
+        default:
+          this.log(cli.chalk['gray'](message.toString()))
+      }
     })
 
     server.on('end', () => {

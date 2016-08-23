@@ -110,9 +110,9 @@ public class ClientHandler implements Runnable {
 					case "@":
 						log.info("From <{}> to <{}>: <{}>", message.getUsername(), reciever, message.getContents());
 						String msg = mapper.writeValueAsString(message);
-						PrintWriter broadWriter = new PrintWriter(new OutputStreamWriter(clientMap.get(reciever).getOutputStream()));
-						broadWriter.write(msg);
-						broadWriter.flush();
+						PrintWriter directWriter = new PrintWriter(new OutputStreamWriter(clientMap.get(reciever).getOutputStream()));
+						directWriter.write(msg);
+						directWriter.flush();
 						break;
 				}
 			}
