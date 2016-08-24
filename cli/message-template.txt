@@ -15,4 +15,3 @@ users:
 `${timestamp}: currently connected users:`
 (repeated)
 `<${username}>`
-
