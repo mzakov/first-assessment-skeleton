@@ -3,6 +3,7 @@ package com.cooksys.assessment.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 import org.slf4j.Logger;
@@ -19,7 +20,9 @@ public class Server implements Runnable {
 		this.port = port;
 		this.executor = executor;
 	}
-
+	
+	public static ConcurrentHashMap<String, Socket> clientMap = new ConcurrentHashMap<String, Socket>();
+	
 	public void run() {
 		log.info("server started");
 		ServerSocket ss;
@@ -28,6 +31,7 @@ public class Server implements Runnable {
 			while (true) {
 				Socket socket = ss.accept();
 				ClientHandler handler = new ClientHandler(socket);
+				log.info("Socket accepted <{}>", socket);
 				executor.execute(handler);
 			}
 		} catch (IOException e) {

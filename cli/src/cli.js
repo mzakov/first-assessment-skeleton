@@ -13,10 +13,9 @@ let defCommand = ''
 
 cli
   .delimiter(cli.chalk['yellow']('ftd~$'))
-
 cli
   .mode('connect <username> <host>')
-  .delimiter(cli.chalk['green']('connected>'))
+  .delimiter(cli.chalk['green'](':'))
   .init(function (args, callback) {
     username = args.username
     server = connect({ host: args.host, port: 8080 }, () => {
@@ -24,6 +23,8 @@ cli
       callback()
     })
 
+    cli
+      .delimiter(cli.chalk['green'](username))
     server.on('data', (buffer) => {
       let message = Message.fromJSON(buffer)
       switch (message.command) {
