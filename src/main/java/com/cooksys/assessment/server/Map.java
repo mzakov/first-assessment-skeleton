@@ -8,12 +8,13 @@ public class Map {
 
 	ConcurrentHashMap<String, Socket> clientMap = new ConcurrentHashMap<String, Socket>();
 
-	   private Map() {}
+	private Map() {
+	}
 
-	   public static Map getInstance() {
+	public static Map getInstance() {
 
-	     return INSTANCE;
+		return INSTANCE;
 
-	   }
-	
+	}
+
 }

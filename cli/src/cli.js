@@ -11,6 +11,15 @@ let username
 let server
 let defCommand = ''
 
+function isJsonString (str) {
+  try {
+    JSON.parse(str)
+  } catch (e) {
+    return false
+  }
+  return true
+}
+
 cli
   .delimiter(cli.chalk['yellow']('ftd~$'))
 cli
@@ -26,25 +35,29 @@ cli
     cli
       .delimiter(cli.chalk['green'](username))
     server.on('data', (buffer) => {
-      let message = Message.fromJSON(buffer)
-      switch (message.command) {
-        case 'echo':
-          this.log(cli.chalk['green'](message.toString()))
-          break
-        case 'broadcast':
-          this.log(cli.chalk['cyan'](message.toString()))
-          break
-        case 'connect':
-          this.log(cli.chalk['gray'](message.toString()))
-          break
-        case 'disconnect':
-          this.log(cli.chalk['gray'](message.toString()))
-          break
-        case 'users':
-          this.log(cli.chalk['gray'](message.toString()))
-          break
-        default:
-          this.log(message.toString())
+      if (isJsonString(buffer)) {
+        let message = Message.fromJSON(buffer)
+        switch (message.command) {
+          case 'echo':
+            this.log(cli.chalk['green'](message.toString()))
+            break
+          case 'broadcast':
+            this.log(cli.chalk['cyan'](message.toString()))
+            break
+          case 'connect':
+            this.log(cli.chalk['gray'](message.toString()))
+            break
+          case 'disconnect':
+            this.log(cli.chalk['gray'](message.toString()))
+            break
+          case 'users':
+            this.log(cli.chalk['gray'](message.toString()))
+            break
+          default:
+            this.log(message.toString())
+        }
+      } else {
+        this.log('There was a JSON collision!')
       }
     })
 

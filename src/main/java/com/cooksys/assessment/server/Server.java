@@ -19,7 +19,7 @@ public class Server implements Runnable {
 		this.port = port;
 		this.executor = executor;
 	}
-	
+
 	public void run() {
 		log.info("server started");
 		ServerSocket ss;
