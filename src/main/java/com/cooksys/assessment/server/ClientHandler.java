@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +26,7 @@ public class ClientHandler implements Runnable {
 
 	private String client;
 	public String reciever = "";
+	private ConcurrentHashMap<String, Socket> map = Map.getInstance().clientMap;
 
 	private void send(Message message, Socket socket){
 		try {
@@ -45,7 +48,7 @@ public class ClientHandler implements Runnable {
 			ObjectMapper mapper = new ObjectMapper();
 			String msg = mapper.writeValueAsString(message);
 
-			for (Socket socket : Server.clientMap.values()) {
+			for (Socket socket : map.values()) {
 				log.info("broadcast sent to socket <{}>", socket);
 				PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
 				writer.write(msg);
@@ -67,25 +70,24 @@ public class ClientHandler implements Runnable {
 				String raw = reader.readLine();
 				Message message = mapper.readValue(raw, Message.class);
 
-				if (message.getCommand().charAt(0) == '@' && Server.clientMap.containsKey(message.getCommand().substring(1))) {
+				if (message.getCommand().charAt(0) == '@' && map.containsKey(message.getCommand().substring(1))) {
 					reciever = message.getCommand().substring(1);
 					message.setCommand("@");
 					log.info("Command: <{}>; Reciever: <{}>", message.getCommand(), reciever);
 				}
+				if (!map.containsKey(message.getUsername()) && !message.getCommand().equals("connect")){
+					socket.close();
+				}
 
 				switch (message.getCommand()) {
 				
-				case "connect":
-					boolean ipInUse = false;
-					for (String key : Server.clientMap.keySet()) {
-						if (Server.clientMap.get(key).getInetAddress().equals(socket.getInetAddress())) {
-							ipInUse = true;
-							Server.clientMap.remove(key);
+				case "connect":;
+					for (String key : map.keySet()) {
+						if (map.get(key).getInetAddress().equals(socket.getInetAddress())) {
+							map.remove(key);
 						}
 					}
-					log.info("IP in Use <{}>", ipInUse);
-					if (Server.clientMap.containsKey(message.getUsername()) || message.getUsername().contains(" ")
-							|| ipInUse) {
+					if (map.containsKey(message.getUsername()) || message.getUsername().contains(" ")) {
 						message.setCommand("disconnect");
 						message.setContents("\n The username '" + message.getUsername() + "' or IP"
 								+ socket.getInetAddress()
@@ -95,8 +97,8 @@ public class ClientHandler implements Runnable {
 					} else {
 						log.info("user <{}> connected", message.getUsername());
 						client = message.getUsername();
-						Server.clientMap.put(client, socket);
-						log.info("Users online <{}>", Server.clientMap.entrySet());
+						map.put(client, socket);
+						log.info("Users online <{}>", map.entrySet());
 						message.setContents("I'm online!");
 						broadcast(message);
 					}
@@ -104,7 +106,7 @@ public class ClientHandler implements Runnable {
 					
 				case "disconnect":
 					log.info("user <{}> disconnected", message.getUsername());
-					Server.clientMap.remove(message.getUsername());
+					map.remove(message.getUsername());
 					message.setContents("I'm Gone!");
 					broadcast(message);
 					this.socket.close();
@@ -123,8 +125,8 @@ public class ClientHandler implements Runnable {
 				case "users":
 					log.info("user <{}> asked for users list", message.getUsername());
 					String usersList = "";
-					for (String key : Server.clientMap.keySet()) {
-						usersList += key + " " + Server.clientMap.get(key).getInetAddress() + "\n";
+					for (String key : map.keySet()) {
+						usersList += key + " " + map.get(key).getInetAddress() + "\n";
 					}
 					message.setContents("\n List of users: \n" + usersList);
 					send(message, socket);
@@ -132,8 +134,8 @@ public class ClientHandler implements Runnable {
 					
 				case "@":
 					log.info("From <{}> to <{}>: <{}>", message.getUsername(), reciever, message.getContents());
-					send(message, Server.clientMap.get(reciever));
-					if(!socket.equals(Server.clientMap.get(reciever))){
+					send(message, map.get(reciever));
+					if(!socket.equals(map.get(reciever))){
 					send(message, socket);
 					}
 					break;
@@ -145,7 +147,7 @@ public class ClientHandler implements Runnable {
 				}
 			}
 		} catch (IOException e) {
-			Server.clientMap.remove(client);
+			map.remove(client);
 			log.error("Something went wrong :/", e);
 		}
 	}
