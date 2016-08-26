@@ -159,7 +159,7 @@ public class ClientHandler implements Runnable {
 					log.info("From <{}> to <{}>: <{}>", message.getUsername(), reciever, message.getContents());
 					send(message, map.get(reciever));
 					if (!socket.equals(map.get(reciever))) {
-						send(message, socket);
+						send(message, map.get(message.getUsername()));
 					}
 					// messaging to multiple users
 					Pattern p = Pattern.compile("\\@(.*?)\\ ");
@@ -176,7 +176,7 @@ public class ClientHandler implements Runnable {
 
 				default:
 					message.setContents("---Invalid Command---");
-					send(message, socket);
+					send(message, map.get(message.getUsername()));
 					break;
 				}
 			}

@@ -35,8 +35,9 @@ cli
     cli
       .delimiter(cli.chalk['green'](username))
     server.on('data', (buffer) => {
-      if (isJsonString(buffer)) {
-        let message = Message.fromJSON(buffer)
+      let string = buffer.toString()
+      if (isJsonString(string)) {
+        let message = Message.fromJSON(string)
         switch (message.command) {
           case 'echo':
             this.log(cli.chalk['green'](message.toString()))
@@ -57,7 +58,15 @@ cli
             this.log(message.toString())
         }
       } else {
-        this.log('There was a JSON collision!')
+        let source = string.replace(/}/gi, '}{vokaZvenatSnitraM}')
+        let jsons = source.split('{vokaZvenatSnitraM}')
+        for (let i = 0; i < jsons.length - 1; i++) {
+          if (isJsonString(jsons[i])) {
+            this.log(cli.chalk['gray'](Message.fromJSON(jsons[i]).toString()))
+          } else {
+            this.log('JSON collision detected!')
+          }
+        }
       }
     })
 
@@ -75,7 +84,7 @@ cli
     } else {
       cont = input
     }
-    const [ command, ...rest ] = words(cont, /[^, ]+/g)
+    const [ command, ...rest ] = words(cont, /[^ ]+/g)
     const contents = rest.join(' ')
     if (command === 'disconnect') {
       server.end(new Message({ username, command }).toJSON() + '\n')
