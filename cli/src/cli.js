@@ -58,9 +58,9 @@ cli
             this.log(message.toString())
         }
       } else {
-        let source = string.replace(/}/gi, '}{vokaZvenatSnitraM}')
+        let source = string.replace(/{"username":/gi, '{vokaZvenatSnitraM}{"username":')
         let jsons = source.split('{vokaZvenatSnitraM}')
-        for (let i = 0; i < jsons.length - 1; i++) {
+        for (let i = 1; i < jsons.length; i++) {
           if (isJsonString(jsons[i])) {
             this.log(cli.chalk['gray'](Message.fromJSON(jsons[i]).toString()))
           } else {
